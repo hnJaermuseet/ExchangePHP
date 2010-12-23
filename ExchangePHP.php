@@ -49,6 +49,7 @@ class ExchangePHP
 		);
 	
 	public $have_started_createItem = false;
+	public $have_started_deleteItem = false;
 	
 	public function __construct ($client)
 	{
@@ -180,5 +181,58 @@ class ExchangePHP
 			// Return null
 			return array(0 => null);
 		}
+	}
+	
+	/**
+	 * Mkes the DeleteItem object with some default variables
+	 * Used by addCalendarItem
+	 */
+	protected function deleteCalendarItems_startup ()
+	{
+		//$this->DeleteItem->DeleteType = 'HardDelete';
+		$this->DeleteItem->DeleteType = 'SoftDelete';
+		$this->DeleteItem->ItemIds = array();
+		
+		$this->have_started_deleteItem = true;
+	}
+	
+	/**
+	 * Adds an items to the list of items to be deleted
+	 *
+	 * @param   string  Exchange ID
+	 * @return  int     Internal number identifying the item
+	 */
+	public function deleteItems_addItem($id)
+	{
+		if(!$this->have_started_deleteItem)
+			$this->deleteCalendarItems_startup();
+		
+		$i = count($this->DeleteItem->ItemIds);
+		$this->DeleteItem->ItemIds[$i] = array('ItemId' => $id);
+		
+		return $i;
+	}
+	
+	/**
+	 * Deletes the items added by deleteItems_addItem
+	 *
+	 * @return  array  Response message(s)
+	 */
+	public function deleteItem($id)//, $changekey)
+	{
+		//if(!$this->have_started_deleteItem)
+		//	throw new Exception ('No items added.');
+		//if(count($this->DeleteItem->ItemIds) == 0)
+		//	throw new Exception ('No items added.');
+		
+		$this->DeleteItem->DeleteType = 'SoftDelete';
+		$this->DeleteItem->ItemIds->ItemId->Id = $id; /* = array(
+				'Id' => $id,
+				//'ChangeKey' => $changekey,
+			);/**/
+		$this->DeleteItem->SendMeetingCancellations = 'SendToNone';
+		
+		$result = $this->client->DeleteItem($this->DeleteItem); // < $this->client holds SOAP-client object
+		return ($result->ResponseMessages->DeleteItemResponseMessage->ResponseClass == 'Success');
 	}
 }

@@ -212,18 +212,18 @@ foreach($items as $item)
 	}
 	if($delete)
 	{
-		//$i = $cal->deleteItem_addItem($delete_id['Id'], $delete_id['changeKey']);
-		//$items_delete[$i] = $item['id'];
+		$items_delete[$item['id']] = $item;
 	}
 }
 
+/* ## CREATE ITEMS ## */
 try
 {
 	$created_items = $cal->createCalendarItems();
 }
 catch (Exception $e)
 {
-	echo 'Exception: '.$e->getMessage().'<br />';
+	echo 'Exception - createCalendarItems: '.$e->getMessage().'<br />';
 	$created_items = array();
 }
 
@@ -249,3 +249,42 @@ foreach($created_items as $i => $ids)
 		echo mysql_error();
 	}
 }
+
+/* ## DELETE ITEMS ## */
+$deleted_items = array();
+foreach($items_delete as $item_id => $item)
+{
+	try
+	{
+		$deleted_item = $cal->deleteItem($sync[$item['id']]['e_id']);
+		$deleted_items[$item['id']] = $deleted_item;
+		echo $item['id'].' deleted<br>';
+	}
+	catch (Exception $e)
+	{
+		echo 'Exception - deleteItem - '.$item['id'].': '.$e->getMessage().'<br />';
+	}
+}
+/*
+foreach($deleted_items as $i => $ids)
+{
+	if(!is_null($ids)) // Null = unsuccessful
+	{
+		echo $items_new[$i].' synced (created).<br />';
+		mysql_query("INSERT INTO `sync` (
+			`item_id` ,
+			`e_id` ,
+			`e_changekey`,
+			`user`,
+			`time`
+		)
+		VALUES (
+			'".$items_new[$i]."' , 
+			'".$ids['Id']."', 
+			'".$ids['ChangeKey']."',
+			'".$login['username']."',
+			'".time()."'
+		);");
+		echo mysql_error();
+	}
+}*/
