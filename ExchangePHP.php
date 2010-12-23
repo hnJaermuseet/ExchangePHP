@@ -83,7 +83,7 @@ class ExchangePHP
 	 * Makes the CreateItem object with some default variables
 	 * Used by addCalendarItem
 	 */
-	protected function createItems_startup ()
+	protected function createCalendarItems_startup ()
 	{
 		$this->CreateItem->SavedItemFolderId->DistinguishedFolderId->Id = 'calendar';
 		$this->CreateItem->Items->CalendarItem = array();
@@ -102,10 +102,10 @@ class ExchangePHP
 	 * @param   array   Options that are allowed to the to Exchange
 	 * @return  int     Internal number identifying the item
 	 */
-	public function createItems_addItem($title, $text, $start, $end, $options)
+	public function createCalendarItems_addItem($title, $text, $start, $end, $options)
 	{
 		if(!$this->have_started_createItem)
-			$this->createItems_startup();
+			$this->createCalendarItems_startup();
 		if(!is_array($options))
 			throw new Exception('Options must be array');
 		
@@ -131,11 +131,11 @@ class ExchangePHP
 	}
 	
 	/**
-	 * Creates the items added by addCalendarItem
+	 * Creates the items added by createCalendarItems_addItem
 	 *
 	 * @return  array  Response message(s)
 	 */
-	public function createItems()
+	public function createCalendarItems()
 	{
 		if(!$this->have_started_createItem)
 			throw new Exception ('No items added.');

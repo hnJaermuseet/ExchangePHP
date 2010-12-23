@@ -202,7 +202,7 @@ foreach($items as $item)
 	
 	if($create_new)
 	{
-		$i = $cal->createItems_addItem($item['title'], $item['text'], date('c'), date('c', time()+60*60),
+		$i = $cal->createCalendarItems_addItem($item['title'], $item['text'], date('c'), date('c', time()+60*60),
 				array(
 					'ReminderIsSet' => false,
 					'Location' => 'Interwebs',
@@ -219,7 +219,7 @@ foreach($items as $item)
 
 try
 {
-	$created_items = $cal->createItems();
+	$created_items = $cal->createCalendarItems();
 }
 catch (Exception $e)
 {
