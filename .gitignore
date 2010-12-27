@@ -2,3 +2,4 @@ demo/Services.wsdl
 demo/messages.xsd
 demo/types.xsd
 demo/logs/log*
+demo/password.php

@@ -67,10 +67,13 @@ http://www.howtoforge.com/talking-soap-with-exchange
 require_once dirname(__FILE__).'/../ExchangePHP.php';
 
 // Exchange login
+require dirname(__FILE__).'/password.php';
+/* Syntax:
 $login = array(
-		'username' => 'hn',
-		'password' => 'Nsar01',
+		'username' => '',
+		'password' => '',
 	);
+*/
 
 // MySQL
 mysql_connect('localhost', 'exchangetest', '');
