@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__FILE__).'/NTLMSoapClient.php';
-require_once dirname(__FILE__).'/NTLMStream.php';
 
 /**
  * EXCHANGEPHP
@@ -72,6 +71,7 @@ class ExchangePHP
 		$FindItem->Traversal = "Shallow";
 		$FindItem->ItemShape->BaseShape = "AllProperties";
 		$FindItem->ParentFolderIds->DistinguishedFolderId->Id = "calendar";
+		//$FindItem->ParentFolderIds->DistinguishedFolderId->Mailbox->EmailAddress = 'abc@jaermuseet.no';
 		$FindItem->CalendarView->StartDate = $from;
 		$FindItem->CalendarView->EndDate = $to;
 		$result = $this->client->FindItem($FindItem);
@@ -131,6 +131,9 @@ class ExchangePHP
 				$this->CreateItem->Items->CalendarItem[$i]->{$option} = $value;
 			}
 		}
+		
+		//$this->CreateItem->Items->CalendarItem[$i]->RequiredAttendees->Attendee[]->Mailbox->EmailAddress = 'hn@jaermuseet.no';
+		//$this->CreateItem->Items->CalendarItem[$i]->RequiredAttendees->Attendee[]->Mailbox->EmailAddress = 'runar.sandsmark@jaermuseet.no';
 		
 		return $i;
 	}

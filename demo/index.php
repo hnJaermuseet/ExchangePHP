@@ -140,9 +140,6 @@ while($R_sync = mysql_fetch_assoc($Q))
 	$sync[$R_sync['item_id']] = $R_sync;
 }
 
-stream_wrapper_unregister('https');
-stream_wrapper_register('https', 'NTLMStream') or die("Failed to register protocol");
-
 $wsdl = dirname(__FILE__).'/Services.wsdl';
 $client = new NTLMSoapClient($wsdl, array(
 		'login'       => $login['username'], 
@@ -150,9 +147,6 @@ $client = new NTLMSoapClient($wsdl, array(
 		'trace'       => true,
 		'exceptions'  => true,
 	)); 
-
-/* Do something with the web service connection */
-stream_wrapper_restore('https');
 
 $cal = new ExchangePHP($client);
 
