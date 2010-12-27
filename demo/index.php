@@ -240,6 +240,13 @@ foreach($created_items as $i => $ids)
 	if(!is_null($ids)) // Null = unsuccessful
 	{
 		echo $items_new[$i].' created.<br />';
+		// Deleting from sync
+		mysql_query("DELETE FROM `sync`
+			WHERE
+				`item_id` = '".$items_new[$i]."'
+			");
+		echo mysql_error();
+		// Inserting in sync
 		mysql_query("INSERT INTO `sync` (
 			`item_id` ,
 			`e_id` ,
