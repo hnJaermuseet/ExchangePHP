@@ -66,6 +66,18 @@ http://www.howtoforge.com/talking-soap-with-exchange
 
 require_once dirname(__FILE__).'/../ExchangePHP.php';
 
+function printout ($txt)
+{
+	if(php_sapi_name() == 'cli') // Command line
+	{
+		echo $txt."\r\n";
+	}
+	else
+	{
+		echo str_replace(' ', '&nbsp;', $txt).'<br />'.chr(10);
+	}
+}
+
 // Exchange login
 require dirname(__FILE__).'/password.php';
 /* Syntax:
@@ -99,12 +111,16 @@ if(isset($_GET['erase']))
 	);");
 	echo mysql_error();
 	
-	echo 'DB reset';
+	printout('DB reset');
 	exit;
 }
-echo '<a href="">Run</a> -:- ';
-echo '<a href="?erase=1">Reset database</a>';
-echo '<br /><br />'.chr(10).chr(10);
+
+if(php_sapi_name() != 'cli')
+{
+	echo '<a href="">Run</a> -:- ';
+	echo '<a href="?erase=1">Reset database</a>';
+	echo '<br /><br />'.chr(10).chr(10);
+}
 
 // Getting items
 $items = array();
@@ -149,12 +165,12 @@ try
 }
 catch (Exception $e)
 {
-	echo 'Exception - getCalendarItems: '.$e->getMessage().'<br />'.chr(10);
+	printout('Exception - getCalendarItems: '.$e->getMessage());
 	
 	if($cal->client->getError() == '401')
 	{
 		// Unauthorized
-		echo 'Wrong username and password.';
+		printout('Wrong username and password.');
 	}
 	exit;
 }
@@ -189,7 +205,7 @@ foreach($items as $item) // Running through items in database
 		$this_sync = $sync[$item['id']];
 		if(!isset($cal_ids[$this_sync['e_id']]))
 		{
-			echo '<span color="red">Err! Calendar element is deleted in Exchange!</span><br />'.chr(10);
+			printout('<span color="red">Err! Calendar element is deleted in Exchange!</span>');
 			$create_new = true;
 		}
 		else
@@ -197,7 +213,7 @@ foreach($items as $item) // Running through items in database
 			// Check if it is changed in Exchange
 			if($cal_ids[$this_sync['e_id']] != $this_sync['e_changekey'])
 			{
-				echo '<span color="red">Err! Calendar element is changed in Exchange!</span><br />'.chr(10);
+				printout('<span color="red">Err! Calendar element is changed in Exchange!</span>');
 				$create_new = true;
 			}
 			else
@@ -245,7 +261,7 @@ try
 }
 catch (Exception $e)
 {
-	echo 'Exception - createCalendarItems: '.$e->getMessage().'<br />'.chr(10);
+	printout('Exception - createCalendarItems: '.$e->getMessage().'<br />');
 	$created_items = array();
 }
 
@@ -253,7 +269,7 @@ foreach($created_items as $i => $ids)
 {
 	if(!is_null($ids)) // Null = unsuccessful
 	{
-		echo $items_new[$i].' created.<br />'.chr(10);
+		printout($items_new[$i].' created.');
 		// Deleting from sync
 		mysql_query("DELETE FROM `sync`
 			WHERE
@@ -287,11 +303,11 @@ foreach($items_delete as $item_id => $item)
 	{
 		$deleted_item = $cal->deleteItem($sync[$item['id']]['e_id']);
 		$deleted_items[$item['id']] = $deleted_item;
-		echo $item['id'].' deleted<br />'.chr(10);
+		printout($item['id'].' deleted');
 	}
 	catch (Exception $e)
 	{
-		echo 'Exception - deleteItem - '.$item['id'].': '.$e->getMessage().'<br />'.chr(10);
+		printout('Exception - deleteItem - '.$item['id'].': '.$e->getMessage());
 	}
 }
 /*
@@ -299,7 +315,7 @@ foreach($deleted_items as $i => $ids)
 {
 	if(!is_null($ids)) // Null = unsuccessful
 	{
-		echo $items_new[$i].' synced (created).<br />'.chr(10);
+		printout($items_new[$i].' synced (created).');
 		mysql_query("INSERT INTO `sync` (
 			`item_id` ,
 			`e_id` ,
