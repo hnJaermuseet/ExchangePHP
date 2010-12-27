@@ -139,7 +139,10 @@ $cal = new ExchangePHP($client);
 
 try
 {
-	$calendaritems = $cal->getCalendarItems("2010-10-01T00:00:00Z","2010-12-31T00:00:00Z");
+	$calendaritems = $cal->getCalendarItems(
+		date('Y-m-d').'T00:00:00', // Today
+		date('Y-m-d',time()+61171200).'T00:00:00Z' // Approx 2 years, seems to be a limit
+	);
 }
 catch (Exception $e)
 {
