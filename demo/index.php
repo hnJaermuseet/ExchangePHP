@@ -126,23 +126,31 @@ stream_wrapper_register('https', 'NTLMStream') or die("Failed to register protoc
 
 $wsdl = "Services.wsdl";
 $client = new NTLMSoapClient($wsdl, array(
-		'login'     => $login['username'], 
-		'password'  => $login['password'],
-		'trace'     => 1,
+		'login'       => $login['username'], 
+		'password'    => $login['password'],
+		'trace'       => true,
+		'exceptions'  => true,
 	)); 
 
 /* Do something with the web service connection */
 stream_wrapper_restore('https');
 
-
 $cal = new ExchangePHP($client);
+
 try
 {
 	$calendaritems = $cal->getCalendarItems("2010-10-01T00:00:00Z","2010-12-31T00:00:00Z");
 }
 catch (Exception $e)
 {
-	echo 'Exception: '.$e->getMessage().'<br />';
+	echo 'Exception - getCalendarItems: '.$e->getMessage().'<br />';
+	
+	if($cal->client->getError() == '401')
+	{
+		// Unauthorized
+		echo 'Wrong username and password.';
+	}
+	exit;
 }
 
 // Going through existing elements

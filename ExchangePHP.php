@@ -36,7 +36,7 @@ require_once 'NTLMStream.php';
 
 class ExchangePHP
 {
-	protected $client;
+	public $client;
 	
 	protected $calendaritem_valid_options =
 		array(
