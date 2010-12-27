@@ -239,7 +239,7 @@ foreach($created_items as $i => $ids)
 {
 	if(!is_null($ids)) // Null = unsuccessful
 	{
-		echo $items_new[$i].' synced (created).<br />';
+		echo $items_new[$i].' created.<br />';
 		mysql_query("INSERT INTO `sync` (
 			`item_id` ,
 			`e_id` ,
