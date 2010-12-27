@@ -101,7 +101,7 @@ if(isset($_GET['erase']))
 }
 echo '<a href="">Run</a> -:- ';
 echo '<a href="?erase=1">Reset database</a>';
-echo '<br /><br />';
+echo '<br /><br />'.chr(10).chr(10);
 
 // Getting items
 $items = array();
@@ -143,7 +143,7 @@ try
 }
 catch (Exception $e)
 {
-	echo 'Exception - getCalendarItems: '.$e->getMessage().'<br />';
+	echo 'Exception - getCalendarItems: '.$e->getMessage().'<br />'.chr(10);
 	
 	if($cal->client->getError() == '401')
 	{
@@ -159,7 +159,7 @@ foreach($calendaritems as $item) {
 	if(!isset($item->Subject))
 		$item->Subject = '';
 	$cal_ids[$item->ItemId->Id] = $item->ItemId->ChangeKey;
-	echo 'Existing: '.$item->Start.'&nbsp;&nbsp;&nbsp;'.$item->End.'&nbsp;&nbsp;&nbsp;'.$item->Subject."<br>";
+	echo 'Existing: '.$item->Start.'&nbsp;&nbsp;&nbsp;'.$item->End.'&nbsp;&nbsp;&nbsp;'.$item->Subject.'<br />'.chr(10);
 } 
 
 // Analysing which to create
@@ -175,7 +175,7 @@ foreach($items as $item) // Running through items in database
 		$this_sync = $sync[$item['id']];
 		if(!isset($cal_ids[$this_sync['e_id']]))
 		{
-			echo '<span color="red">Err! Calendar element is deleted in Exchange!</span><br />';
+			echo '<span color="red">Err! Calendar element is deleted in Exchange!</span><br />'.chr(10);
 			$create_new = true;
 		}
 		else
@@ -183,7 +183,7 @@ foreach($items as $item) // Running through items in database
 			// Check if it is changed in Exchange
 			if($cal_ids[$this_sync['e_id']] != $this_sync['e_changekey'])
 			{
-				echo '<span color="red">Err! Calendar element is changed in Exchange!</span><br />';
+				echo '<span color="red">Err! Calendar element is changed in Exchange!</span><br />'.chr(10);
 				$create_new = true;
 			}
 			else
@@ -231,7 +231,7 @@ try
 }
 catch (Exception $e)
 {
-	echo 'Exception - createCalendarItems: '.$e->getMessage().'<br />';
+	echo 'Exception - createCalendarItems: '.$e->getMessage().'<br />'.chr(10);
 	$created_items = array();
 }
 
@@ -239,7 +239,7 @@ foreach($created_items as $i => $ids)
 {
 	if(!is_null($ids)) // Null = unsuccessful
 	{
-		echo $items_new[$i].' created.<br />';
+		echo $items_new[$i].' created.<br />'.chr(10);
 		// Deleting from sync
 		mysql_query("DELETE FROM `sync`
 			WHERE
@@ -273,11 +273,11 @@ foreach($items_delete as $item_id => $item)
 	{
 		$deleted_item = $cal->deleteItem($sync[$item['id']]['e_id']);
 		$deleted_items[$item['id']] = $deleted_item;
-		echo $item['id'].' deleted<br>';
+		echo $item['id'].' deleted<br />'.chr(10);
 	}
 	catch (Exception $e)
 	{
-		echo 'Exception - deleteItem - '.$item['id'].': '.$e->getMessage().'<br />';
+		echo 'Exception - deleteItem - '.$item['id'].': '.$e->getMessage().'<br />'.chr(10);
 	}
 }
 /*
@@ -285,7 +285,7 @@ foreach($deleted_items as $i => $ids)
 {
 	if(!is_null($ids)) // Null = unsuccessful
 	{
-		echo $items_new[$i].' synced (created).<br />';
+		echo $items_new[$i].' synced (created).<br />'.chr(10);
 		mysql_query("INSERT INTO `sync` (
 			`item_id` ,
 			`e_id` ,
