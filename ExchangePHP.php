@@ -1,7 +1,7 @@
 <?php
 
-require_once 'NTLMSoapClient.php';
-require_once 'NTLMStream.php';
+require_once dirname(__FILE__).'/NTLMSoapClient.php';
+require_once dirname(__FILE__).'/NTLMStream.php';
 
 /**
  * EXCHANGEPHP

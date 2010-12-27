@@ -64,7 +64,7 @@ http://www.howtoforge.com/talking-soap-with-exchange
 
 */
 
-require_once '../ExchangePHP.php';
+require_once dirname(__FILE__).'/../ExchangePHP.php';
 
 // Exchange login
 $login = array(
@@ -124,7 +124,7 @@ while($R_sync = mysql_fetch_assoc($Q))
 stream_wrapper_unregister('https');
 stream_wrapper_register('https', 'NTLMStream') or die("Failed to register protocol");
 
-$wsdl = "Services.wsdl";
+$wsdl = dirname(__FILE__).'/Services.wsdl';
 $client = new NTLMSoapClient($wsdl, array(
 		'login'       => $login['username'], 
 		'password'    => $login['password'],
