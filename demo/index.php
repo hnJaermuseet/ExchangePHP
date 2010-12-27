@@ -165,7 +165,7 @@ foreach($calendaritems as $item) {
 // Analysing which to create
 $items_new     = array();
 $items_delete  = array();
-foreach($items as $item)
+foreach($items as $item) // Running through items in database
 {
 	// Checking for previous sync
 	$delete = false;
