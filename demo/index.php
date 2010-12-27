@@ -156,14 +156,22 @@ catch (Exception $e)
 	exit;
 }
 
-// Going through existing elements
+
 $cal_ids = array(); // Id => ChangeKey
-foreach($calendaritems as $item) {
-	if(!isset($item->Subject))
-		$item->Subject = '';
-	$cal_ids[$item->ItemId->Id] = $item->ItemId->ChangeKey;
-	echo 'Existing: '.$item->Start.'&nbsp;&nbsp;&nbsp;'.$item->End.'&nbsp;&nbsp;&nbsp;'.$item->Subject.'<br />'.chr(10);
-} 
+if(is_null($calendaritems))
+{
+	printout('getCalendarItems failed: '.$cal->getError());
+}
+else
+{
+	// Going through existing elements
+	foreach($calendaritems as $item) {
+		if(!isset($item->Subject))
+			$item->Subject = '';
+		$cal_ids[$item->ItemId->Id] = $item->ItemId->ChangeKey;
+		printout('Existing: '.$item->Start.'   '.$item->End.'   '.$item->Subject);
+	}
+}
 
 // Analysing which to create
 $items_new     = array();

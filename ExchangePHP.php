@@ -37,6 +37,7 @@ require_once dirname(__FILE__).'/NTLMStream.php';
 class ExchangePHP
 {
 	public $client;
+	protected $error;
 	
 	protected $calendaritem_valid_options =
 		array(
@@ -75,7 +76,10 @@ class ExchangePHP
 		$FindItem->CalendarView->EndDate = $to;
 		$result = $this->client->FindItem($FindItem);
 		if($result->ResponseMessages->FindItemResponseMessage->ResponseClass != 'Success')
+		{
+			$this->setError($result->ResponseMessages->FindItemResponseMessage->MessageText);
 			return null;
+		}
 		else
 			return $result->ResponseMessages->FindItemResponseMessage->RootFolder->Items->CalendarItem;
 	}
@@ -234,5 +238,23 @@ class ExchangePHP
 		
 		$result = $this->client->DeleteItem($this->DeleteItem); // < $this->client holds SOAP-client object
 		return ($result->ResponseMessages->DeleteItemResponseMessage->ResponseClass == 'Success');
+	}
+	
+	public function setError($error)
+	{
+		$this->error = $error;
+	}
+	
+	public function hasError()
+	{
+		return isset($this->error);
+	}
+	
+	public function getError()
+	{
+		if(isset($this->error))
+			return $this->error;
+		else
+			return ''; // No error
 	}
 }
