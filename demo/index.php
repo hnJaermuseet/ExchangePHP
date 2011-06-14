@@ -68,13 +68,15 @@ require_once dirname(__FILE__).'/../ExchangePHP.php';
 
 function printout ($txt)
 {
+	global $user_id;
 	if(php_sapi_name() == 'cli') // Command line
 	{
-		echo $txt."\r\n";
+		echo date('Y-m-d H:i:s').' [user '.$user_id.'] '.$txt."\r\n";
 	}
 	else
 	{
-		echo str_replace(' ', '&nbsp;', $txt).'<br />'.chr(10);
+		echo str_replace(' ', '&nbsp;', 
+			date('Y-m-d H:i:s').' [user '.$user_id.'] '.$txt).'<br />'.chr(10);
 	}
 }
 
