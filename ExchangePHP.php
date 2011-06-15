@@ -7,7 +7,7 @@ require_once dirname(__FILE__).'/NTLMSoapClient.php';
  * PHP library for talking to Exchange 2007 with SOAP
  * Made by Hallvard Nygård <hn@jaermuseet> for use in
  * JM-booking. JM-booking is a booking system used by
- * Jærmuseet, a Norwegian science center
+ * Jærmuseet, a Norwegian museum and science center
  *
  * CC-BY 2.0
  *
@@ -49,7 +49,6 @@ class ExchangePHP
 		);
 	
 	public $have_started_createItem = false;
-	public $have_started_deleteItem = false;
 	
 	public function __construct ($client)
 	{
@@ -64,14 +63,16 @@ class ExchangePHP
 	 *
 	 * @param   String   From, ISO date
 	 * @param   String   To, ISO date
+	 * @param   String   Optional, what users calendar to get from. Must be primary STMP email address
 	 * @return  Array    Items or null
 	 */
-	public function getCalendarItems($from, $to)
+	public function getCalendarItems($from, $to, $primary_emailaddress = null)
 	{
 		$FindItem->Traversal = "Shallow";
 		$FindItem->ItemShape->BaseShape = "AllProperties";
 		$FindItem->ParentFolderIds->DistinguishedFolderId->Id = "calendar";
-		//$FindItem->ParentFolderIds->DistinguishedFolderId->Mailbox->EmailAddress = 'abc@jaermuseet.no';
+		if(!is_null($primary_emailaddress))
+			$FindItem->ParentFolderIds->DistinguishedFolderId->Mailbox->EmailAddress = $primary_emailaddress;
 		$FindItem->CalendarView->StartDate = $from;
 		$FindItem->CalendarView->EndDate = $to;
 		$result = $this->client->FindItem($FindItem);
@@ -87,10 +88,16 @@ class ExchangePHP
 	/**
 	 * Makes the CreateItem object with some default variables
 	 * Used by addCalendarItem
+	 *
+	 * @param   String  Optional, what users calendar to get from. Must be primary STMP email address
 	 */
-	protected function createCalendarItems_startup ()
+	protected function createCalendarItems_startup ($primary_emailaddress = null)
 	{
 		$this->CreateItem->SavedItemFolderId->DistinguishedFolderId->Id = 'calendar';
+		if(!is_null($primary_emailaddress))
+		{
+			$this->CreateItem->SavedItemFolderId->DistinguishedFolderId->Mailbox->EmailAddress = $primary_emailaddress;
+		}
 		$this->CreateItem->Items->CalendarItem = array();
 		$this->CreateItem->SendMeetingInvitations = "SendToNone";
 		
@@ -105,12 +112,13 @@ class ExchangePHP
 	 * @param   string  Start time, ISO format
 	 * @param   string  End time, ISO format
 	 * @param   array   Options that are allowed to the to Exchange
+	 * @param   String  Optional, what users calendar to get from. Must be primary STMP email address
 	 * @return  int     Internal number identifying the item
 	 */
-	public function createCalendarItems_addItem($title, $text, $start, $end, $options)
+	public function createCalendarItems_addItem($title, $text, $start, $end, $options, $primary_emailaddress = null)
 	{
 		if(!$this->have_started_createItem)
-			$this->createCalendarItems_startup();
+			$this->createCalendarItems_startup($primary_emailaddress);
 		if(!is_array($options))
 			throw new Exception('Options must be array');
 		
@@ -146,9 +154,15 @@ class ExchangePHP
 	public function createCalendarItems()
 	{
 		if(!$this->have_started_createItem)
+		{
+			$this->createCalenderItems_shutdown();
 			throw new Exception ('No items added.');
+		}
 		if(count($this->CreateItem->Items->CalendarItem) == 0)
+		{
+			$this->createCalenderItems_shutdown();
 			throw new Exception ('No items added.');
+		}
 		
 		$result = $this->client->CreateItem($this->CreateItem); // < $this->client holds SOAP-client object
 		if(count($this->CreateItem->Items->CalendarItem) > 1)
@@ -167,15 +181,22 @@ class ExchangePHP
 				else
 				{
 					// If there is no success, return null
-					$ids[$i] = null;
+					printout('Item '.$i.' failed creation: '.print_r($response, true));
+					$ids[$i] = array(
+							'Id' => null,
+							'ResponseMessage' => $response
+						);
 				}
 			}
+			
+			$this->createCalenderItems_shutdown();
 			return $ids;
 		}
 		
 		if ( $result->ResponseMessages->CreateItemResponseMessage->ResponseClass == 'Success' )
 		{
 			// Returning the id/changekey in an array with only one item
+			$this->createCalenderItems_shutdown();
 			return array(0 => 
 				array(
 					'Id' =>  $result->ResponseMessages->CreateItemResponseMessage->Items->CalendarItem->ItemId->Id,
@@ -186,52 +207,32 @@ class ExchangePHP
 		else
 		{
 			// Return null
-			return array(0 => null);
+			$this->createCalenderItems_shutdown();
+			return array(0 => array(
+					'Id' => null,
+					'ResponseMessage' => $result->ResponseMessages->CreateItemResponseMessage
+				));
 		}
 	}
 	
 	/**
-	 * Mkes the DeleteItem object with some default variables
-	 * Used by addCalendarItem
+	 * After creation of calendar items (or it has failed)
+	 * we'll do some clean up
 	 */
-	protected function deleteCalendarItems_startup ()
+	protected function createCalenderItems_shutdown()
 	{
-		//$this->DeleteItem->DeleteType = 'HardDelete';
-		$this->DeleteItem->DeleteType = 'SoftDelete';
-		$this->DeleteItem->ItemIds = array();
-		
-		$this->have_started_deleteItem = true;
+		unset($this->CreateItem);
+		$this->have_started_createItem = false;
 	}
 	
 	/**
-	 * Adds an items to the list of items to be deleted
+	 * Delete the item
 	 *
-	 * @param   string  Exchange ID
-	 * @return  int     Internal number identifying the item
-	 */
-	public function deleteItems_addItem($id)
-	{
-		if(!$this->have_started_deleteItem)
-			$this->deleteCalendarItems_startup();
-		
-		$i = count($this->DeleteItem->ItemIds);
-		$this->DeleteItem->ItemIds[$i] = array('ItemId' => $id);
-		
-		return $i;
-	}
-	
-	/**
-	 * Deletes the items added by deleteItems_addItem
-	 *
-	 * @return  array  Response message(s)
+	 * @param   String  id of the item
+	 * @return  array   Response message(s)
 	 */
 	public function deleteItem($id)//, $changekey)
 	{
-		//if(!$this->have_started_deleteItem)
-		//	throw new Exception ('No items added.');
-		//if(count($this->DeleteItem->ItemIds) == 0)
-		//	throw new Exception ('No items added.');
-		
 		$this->DeleteItem->DeleteType = 'SoftDelete';
 		$this->DeleteItem->ItemIds->ItemId->Id = $id; /* = array(
 				'Id' => $id,
@@ -240,6 +241,8 @@ class ExchangePHP
 		$this->DeleteItem->SendMeetingCancellations = 'SendToNone';
 		
 		$result = $this->client->DeleteItem($this->DeleteItem); // < $this->client holds SOAP-client object
+		
+		unset($this->DeleteItem); // Clean up
 		return ($result->ResponseMessages->DeleteItemResponseMessage->ResponseClass == 'Success');
 	}
 	

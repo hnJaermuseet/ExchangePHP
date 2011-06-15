@@ -263,7 +263,7 @@ catch (Exception $e)
 
 foreach($created_items as $i => $ids)
 {
-	if(!is_null($ids)) // Null = unsuccessful
+	if(!is_null($ids['Id'])) // Null = unsuccessful
 	{
 		printout($items_new[$i].' created.');
 		// Deleting from sync
@@ -288,6 +288,10 @@ foreach($created_items as $i => $ids)
 			'".time()."'
 		);");
 		echo mysql_error();
+	}
+	else
+	{
+		printout($items_new[$user_id][$i] .' not created: '.print_r($ids['ResponseMessage'], true));
 	}
 }
 
