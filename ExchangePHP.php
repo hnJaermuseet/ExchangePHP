@@ -37,6 +37,8 @@ class ExchangePHP
 {
 	public $client;
 	protected $error;
+	protected $responseClass = '';
+	protected $responseCode = '';
 	
 	protected $calendaritem_valid_options =
 		array(
@@ -76,6 +78,9 @@ class ExchangePHP
 		$FindItem->CalendarView->StartDate = $from;
 		$FindItem->CalendarView->EndDate = $to;
 		$result = $this->client->FindItem($FindItem);
+		
+		$this->setResponseCode($result->ResponseMessages->FindItemResponseMessage->ResponseCode);
+		$this->setResponseClass($result->ResponseMessages->FindItemResponseMessage->ResponseClass);
 		if($result->ResponseMessages->FindItemResponseMessage->ResponseClass != 'Success')
 		{
 			$this->setError($result->ResponseMessages->FindItemResponseMessage->MessageText);
@@ -262,5 +267,18 @@ class ExchangePHP
 			return $this->error;
 		else
 			return ''; // No error
+	}
+	
+	public function setResponseClass($a) {
+		$this->responseClass = $a;
+	}
+	public function getResponseClass() {
+		return $this->responseClass;
+	}
+	public function setResponseCode($a) {
+		$this->responseCode = $a;
+	}
+	public function getResponseCode() {
+		return $this->responseCode;
 	}
 }
