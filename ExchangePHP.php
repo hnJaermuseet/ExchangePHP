@@ -87,7 +87,12 @@ class ExchangePHP
 			return null;
 		}
 		else
-			return $result->ResponseMessages->FindItemResponseMessage->RootFolder->Items->CalendarItem;
+		{
+			if($result->ResponseMessages->FindItemResponseMessage->RootFolder->TotalItemsInView > 0)
+				return $result->ResponseMessages->FindItemResponseMessage->RootFolder->Items->CalendarItem;
+			else
+				return array();
+		}
 	}
 	
 	/**
