@@ -70,6 +70,15 @@ class ExchangePHP
 	 */
 	public function getCalendarItems($from, $to, $primary_emailaddress = null)
 	{
+		// Init
+		$FindItem = new stdClass();
+		$FindItem->ItemShape = new stdClass();
+		$FindItem->ParentFolderIds = new stdClass();
+		$FindItem->ParentFolderIds->DistinguishedFolderId = new stdClass();
+		$FindItem->CalendarView = new stdClass();
+		$FindItem->ParentFolderIds->DistinguishedFolderId->Mailbox = new stdClass();
+		
+		
 		$FindItem->Traversal = "Shallow";
 		$FindItem->ItemShape->BaseShape = "AllProperties";
 		$FindItem->ParentFolderIds->DistinguishedFolderId->Id = "calendar";
@@ -103,6 +112,12 @@ class ExchangePHP
 	 */
 	protected function createCalendarItems_startup ($primary_emailaddress = null)
 	{
+		$this->CreateItem = new stdClass();
+		$this->CreateItem->SavedItemFolderId = new stdClass();
+		$this->CreateItem->SavedItemFolderId->DistinguishedFolderId = new stdClass();
+		$this->CreateItem->SavedItemFolderId->DistinguishedFolderId->Mailbox = new stdClass();
+		$this->CreateItem->Items = new stdClass();
+		
 		$this->CreateItem->SavedItemFolderId->DistinguishedFolderId->Id = 'calendar';
 		if(!is_null($primary_emailaddress))
 		{
@@ -133,6 +148,8 @@ class ExchangePHP
 			throw new Exception('Options must be array');
 		
 		$i = count($this->CreateItem->Items->CalendarItem);
+		
+		$this->CreateItem->Items->CalendarItem[$i] = new stdClass();
 		
 		$this->CreateItem->Items->CalendarItem[$i]->Subject = $title;
 		
@@ -243,6 +260,10 @@ class ExchangePHP
 	 */
 	public function deleteItem($id)//, $changekey)
 	{
+		$this->DeleteItem = new stdClass();
+		$this->DeleteItem->ItemIds = new stdClass();
+		$this->DeleteItem->ItemIds->ItemId = new stdClass();
+		
 		$this->DeleteItem->DeleteType = 'SoftDelete';
 		$this->DeleteItem->ItemIds->ItemId->Id = $id; /* = array(
 				'Id' => $id,
